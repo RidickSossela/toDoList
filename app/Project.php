@@ -10,6 +10,8 @@ class Project extends Model
         'name', 'concluded', 'user_id'
     ];
 
+    public $with = ['user'];
+
     public function user()
     {
         return $this->belongsTo('App\User');

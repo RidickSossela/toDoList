@@ -3,28 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Task;
+use App\Project;
 use Illuminate\Http\Request;
+use Auth;
 
 class TaskController extends Controller
 {
+      /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function list($project)
     {
-        echo "task";
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $project = Project::find($project);
+        $tasks = Task::tasksByUserAndProject($project->id);
+        
+        return view('tasks/index', compact('tasks', 'project'));
     }
 
     /**
@@ -35,8 +39,28 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->input();
+        $data['concluded'] = false;
+        
+        $validation = \Validator::make($data, [
+            'description' => 'required',
+            'project_id' => 'required',
+        ]);
+
+            if ($validation->fails()) {
+                return redirect()->back()->withErrors($validation)->withInput();
+            }
+
+            $res = Task::create($data);
+
+            if ($res) {
+                $request->session()->flash('success', 'Tarefa adicionada');
+            } else {
+                $request->session()->flash('error', 'Sua tarefa não pode ser salvo :(');
+            }
+            return redirect()->back();
     }
+
 
     /**
      * Display the specified resource.
@@ -46,7 +70,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        //
+        return $task;
     }
 
     /**
@@ -57,7 +81,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        return $task;
     }
 
     /**
@@ -69,7 +93,22 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $data = $request->all();
+
+        if (!isset($request->concluded)) { $data['concluded'] = 0; }
+
+        $validation = \Validator::make($data, [
+            'description' => 'required',
+        ]);
+        if ($validation->fails()) {
+            return redirect()->back()->withErrors($validation)->withInput();
+        }
+        
+        $res = Task::find($task->id)->update($data);
+        if ($res) {
+            $request->session()->flash('success', 'Tarefa atualizada!');
+        }
+        return redirect()->back();
     }
 
     /**
@@ -78,8 +117,14 @@ class TaskController extends Controller
      * @param  \App\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Task $task)
+    public function destroy(Request $request, $id)
     {
-        //
+        $res = Task::find($id)->delete();
+        if ($res) {
+            $request->session()->flash('success', 'Tarefa deletada!');
+        } else {
+            $request->session()->flash('error', 'Erro ao apagar tarefa!');
+        }
+        return redirect()->back();
     }
 }

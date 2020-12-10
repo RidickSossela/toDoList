@@ -25,8 +25,8 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        
-        $projects = Project::get();
+        $projects = Project::where('user_id', Auth::id())->get();
+
         return view('projects/index', compact('projects'));
     }
 
@@ -96,16 +96,5 @@ class ProjectController extends Controller
             $request->session()->flash('success', 'Projeto atualizado!');
         }
         return redirect()->back();
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Project  $project
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Project $project)
-    {
-        //
     }
 }

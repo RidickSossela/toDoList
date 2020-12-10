@@ -17,12 +17,16 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/project', 'ProjectController@index')->name('project');
+Route::group(['middlewere' => 'auth'], function () {
+    Route::get('/project', 'ProjectController@index')->name('project');
+    
+    Route::resource('project', 'ProjectController')->except([
+        'create', 'edit'
+    ]);
 
-Route::resource('project', 'ProjectController');
-Route::resource('task', 'TaskController');
+    Route::resource('task', 'TaskController')->except([
+        'index', 'create'
+    ]);
+    Route::get('tasklist/{project}', 'TaskController@list')->name('taskList');
 
-/* Route::group(['middlewere' => 'auth'], function () {
-    Route::resource('conta', 'ContasController')->except([
-        'create','edit'
-    ]); */
+});
