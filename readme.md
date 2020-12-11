@@ -1,3 +1,5 @@
+# toDoList
+
 Clonar o repositorio:
     git clone https://github.com/RidickSossela/toDoList.git
 
@@ -16,3 +18,6 @@ Clonar o repositorio:
 
     Para criar as tabelas rode o comando
         php artisan migrate
+
+    Iniciar o servidor PHP
+        php artisan serve
